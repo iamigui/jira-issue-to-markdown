@@ -2,6 +2,9 @@ name: Tag and Release in Github
 
 on:
   push:
+    branches:
+      - feature/*
+      - release/*
   pull_request:
 
 permissions:
