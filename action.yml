@@ -3,7 +3,7 @@ description: Jira Action to obtain data from Issues and pass it to markdown
 author: iamigui
 
 branding:
-  color: black
+  color: orange
   icon: play-circle
 
 runs:
