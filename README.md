@@ -98,19 +98,19 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Get Tag
+      - name: Get tag
         shell: bash
         id: get_tag
         run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            git fetch --all
+          git fetch --all
+
+          if [ -z "${{ github.event.pull_request.head.ref }}" ]; then
+            echo "branch=${{ github.ref }}" >> $GITHUB_OUTPUT
+          else
             git checkout ${{ github.event.pull_request.head.ref }}
             echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
-          else
-            echo "branch=${{ github.ref }}" >> $GITHUB_OUTPUT
           fi
-          git pull
-          git branch --show-current
+          echo "version=v$(npm pkg get version | tr -d '\"')" >> $GITHUB_OUTPUT
 
       - name: Jira Tasks
         id: jira_tasks
@@ -153,15 +153,18 @@ jobs:
           git config user.name "gh-actions-releaser"
           git config user.email "ghactionsreleaser@gmail.com"
 
-      - name: Get Tag
+      - name: Get tag
         shell: bash
         id: get_tag
         run: |
           git fetch --all
-          git checkout ${{ github.event.pull_request.head.ref }}
-          echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
-          git pull
-          git branch --show-current
+
+          if [ -z "${{ github.event.pull_request.head.ref }}" ]; then
+            echo "branch=${{ github.ref }}" >> $GITHUB_OUTPUT
+          else
+            git checkout ${{ github.event.pull_request.head.ref }}
+            echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
+          fi
           echo "version=v$(npm pkg get version | tr -d '\"')" >> $GITHUB_OUTPUT
 
       - name: Tag the Commit
