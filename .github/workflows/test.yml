@@ -28,7 +28,10 @@ jobs:
           git checkout ${{ github.event.pull_request.head.ref }}
           echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT 
           git pull
-          git branch --show-current
+          export current_branch=$(git branch --show-current)
+          if [ $current_branch == ${{ github.ref }} ];then
+            echo "branch=${{ github.ref }}" >> $GITHUB_OUTPUT 
+          fi
 
       - name: Launch Jira Tasks
         id: jira_tasks
