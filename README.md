@@ -1,6 +1,10 @@
 # Jira Issue to Markdown Action
 
-This action allows you to retrieve Jira `DONE` subtasks from an issue and generate a markdown file with release notes, including detailed issue and subtask information. The branch name must match the pattern used in Jira. Refer to [Inputs](#inputs) for more information.
+This action allows you to retrieve Jira `DONE` subtasks from an issue and generate a markdown file with release notes, including detailed issue and subtask information.
+
+> [!WARNING]
+>
+> The branch name must match the pattern used in Jira. Refer to [Inputs](#inputs) for more information.
 
 ## Features
 
@@ -31,13 +35,15 @@ jobs:
 
 ## Inputs
 
+The inputs are passed as Environment Variables.
+
 - **branch_name** (required): The branch name that corresponds to the Jira issue key (e.g., PROJECTKEY-10). This is used to fetch the corresponding Jira issue and its subtasks.
 
 > [!WARNING]
 >
 > Ensure your branch_name matches the pattern used for Jira issues (e.g., PROJECTKEY-123).
 
-- **jira_data** (required): A JSON object from a secret containing the following keys for authentication and project information:
+- **jira_data** (required): A JSON object from a `secret` containing the following keys for authentication and project information:
 
 ```JSON
 {
@@ -68,65 +74,7 @@ Example output:
 - [SCRUM-19](https://youratlassiandomain.atlassiandomain.atlassian.net/jira/software/projects/SCRUM/boards/1?selectedIssue=PROJECTKEY-19): Only add DONE subtask
 ```
 
-## Example
-
-### Example 1: Push and Pull Request Workflow
-
-This example shows how you can integrate this action into a workflow that triggers on both push and pull request events.
-
-```YAML
-name: Tag and Release in Github
-
-on:
-  push:
-  pull_request:
-    types: [closed]
-
-permissions:
-  contents: write  # Grant permission to write to the repository
-
-jobs:
-  jira-issue-to-markdown:
-    name: Run Jira Tasks
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Get tag
-        shell: bash
-        id: get_tag
-        run: |
-          git fetch --all
-
-          if [ -z "${{ github.event.pull_request.head.ref }}" ]; then
-            echo "branch=${{ github.ref }}" >> $GITHUB_OUTPUT
-          else
-            git checkout ${{ github.event.pull_request.head.ref }}
-            echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
-          fi
-          echo "version=v$(npm pkg get version | tr -d '\"')" >> $GITHUB_OUTPUT
-
-      - name: Jira Tasks
-        id: jira_tasks
-        uses: iamigui/jira-issue-to-markdown@v1
-        with:
-          branch_name: ${{ steps.get_tag.outputs.branch }}
-          jira_data: ${{ secrets.JIRA_DATA }}
-
-      - name: Get Outputs
-        shell: bash
-        run: |
-          echo "Release content from the previous step: ${{ steps.jira_tasks.outputs.release_content }}"
-
-```
-
-### Example 2: Integrate in Pull Request Release
+## Example: Integrate in Pull Request Release
 
 This example shows how to use this action specifically in a pull request to automatically generate and attach release notes based on Jira issues and subtasks.
 
@@ -134,11 +82,17 @@ This example shows how to use this action specifically in a pull request to auto
 name: Tag and Release in Github
 
 on:
+  push:
+    branches:
+      - feature/*
+      - release/*
+      - fix/*
+      - bugfix/*
   pull_request:
     types: [closed]
 
 permissions:
-  contents: write  # Grant permission to write to the repository
+  contents: write # Grant permission to write to the repository
 
 jobs:
   tag-release:
@@ -167,7 +121,7 @@ jobs:
           fi
           echo "version=v$(npm pkg get version | tr -d '\"')" >> $GITHUB_OUTPUT
 
-      - name: Tag the Commit
+      - name: Tag the commit
         if: ${{ github.event.pull_request.merged == true }}
         shell: bash
         run: |
@@ -177,13 +131,47 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Mask secrets
+        id: mask_secrets
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const jira_data = `${{ secrets.JIRA_DATA }}` || '{}';
+
+            const data = JSON.parse(jira_data);
+
+            try {
+              core.setSecret(data.api_token);
+              core.setSecret(data.email);
+              core.setSecret(data.domain);
+              core.setSecret(data.project_key);
+            } catch (error) {
+              core.setFailed(`'jira_data' should be a valid JSON`)
+            }
+
       - name: Launch Jira Tasks
         id: jira_tasks
-        uses: iamigui/jira-issue-to-markdown@v1
-        if: ${{ github.event.pull_request.merged == true }}
+        uses: iamigui/jira-issue-to-markdown@main
+        env:
+          BRANCH_NAME: ${{ steps.get_tag.outputs.branch }}
+          JIRA_API_TOKEN: ${{ fromJSON(secrets.JIRA_DATA).api_token }}
+          JIRA_EMAIL: ${{ fromJSON(secrets.JIRA_DATA).email }}
+          JIRA_DOMAIN: ${{ fromJSON(secrets.JIRA_DATA).domain }}
+          JIRA_PROJECT_KEY: ${{ fromJSON(secrets.JIRA_DATA).project_key }}
+
+      - name: Set Outputs
+        id: set_outputs
+        uses: actions/github-script@v7
         with:
-          branch_name: ${{ steps.get_tag.outputs.branch }}
-          jira_data: ${{ secrets.JIRA_DATA }}
+          script: |
+            const fs = require('fs');
+            const releaseFileContent = fs.readFileSync('RELEASE_NOTES.md', 'utf-8')
+
+            core.setOutput('release_content', releaseFileContent)
+
+      - name: Debug Outputs
+        run: |
+          echo "Release content from the previous step: ${{ steps.set_outputs.outputs.release_content }}"
 
       - name: Release
         id: release
@@ -191,7 +179,7 @@ jobs:
         if: ${{ github.event.pull_request.merged == true }}
         run: |
           TAG_NAME=${{ steps.get_tag.outputs.version }}
-          PR_DESCRIPTION="${{ steps.jira_tasks.outputs.release_content }}"
+          PR_DESCRIPTION="${{ steps.set_outputs.outputs.release_content }}"
           echo "Creating release for tag: $TAG_NAME"
           echo "Description: $PR_DESCRIPTION"
 
@@ -227,9 +215,6 @@ To test the application locally or in a dev environment:
 
 ```shell
 npm install
-
-# Install globally to compile the project
-npm install -g typescript
 ```
 
 ### Configure .env
