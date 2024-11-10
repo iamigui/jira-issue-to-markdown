@@ -56,7 +56,7 @@ jobs:
 
       - name: Launch Jira Tasks
         id: jira_tasks
-        uses: iamigui/jira-issue-to-markdown@feature/SCRUM-10
+        uses: iamigui/jira-issue-to-markdown@main
         env:
           BRANCH_NAME: ${{ steps.get_tag.outputs.branch }}
           JIRA_API_TOKEN: ${{ fromJSON(secrets.JIRA_DATA).api_token }}
