@@ -1,10 +1,10 @@
 # Jira Issue to Markdown Action
 
-This action allows you to retrieve Jira subtasks from an issue and generate a markdown file with release notes, including detailed issue and subtask information. The branch name must match the pattern used in Jira. Refer to [Inputs](#inputs) for more information.
+This action allows you to retrieve Jira `DONE` subtasks from an issue and generate a markdown file with release notes, including detailed issue and subtask information. The branch name must match the pattern used in Jira. Refer to [Inputs](#inputs) for more information.
 
 ## Features
 
-- Retrieve Jira issues and subtasks.
+- Retrieve Jira issues and `DONE` subtasks.
 - Format Jira issue details into markdown.
 - Output a formatted release description suitable for GitHub releases.
 - Integrate directly with GitHub pull requests and push events.
