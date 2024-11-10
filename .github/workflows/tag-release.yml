@@ -6,7 +6,7 @@ on:
       - feature/*
       - release/*
       - fix/*
-      - fixx/*
+      - bugfix/*
   pull_request:
     types: [closed]
 
