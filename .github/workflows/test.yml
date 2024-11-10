@@ -34,7 +34,7 @@ jobs:
         id: jira_tasks
         uses: iamigui/jira-issue-to-markdown@feature/SCRUM-2
         with:
-          branch_name: ${{ github.ref }}
+          branch_name: ${{ steps.get_tag.outputs.branch }}
           jira_data: ${{ secrets.JIRA_DATA }}
 
       - name: Get Outputs
