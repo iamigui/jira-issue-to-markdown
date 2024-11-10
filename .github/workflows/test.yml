@@ -29,13 +29,12 @@ jobs:
           echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT 
           git pull
           git branch --show-current
-          echo "version=v$(npm pkg get version | tr -d '\"')" >> $GITHUB_OUTPUT
 
       - name: Launch Jira Tasks
         id: jira_tasks
-        uses: iamigui/jira-issue-to-markdown@v1
+        uses: iamigui/jira-issue-to-markdown@feature/SCRUM-2
         with:
-          branch_name: ${{ steps.get_tag.outputs.branch }}
+          branch_name: ${{ github.ref }}
           jira_data: ${{ secrets.JIRA_DATA }}
 
       - name: Get Outputs
