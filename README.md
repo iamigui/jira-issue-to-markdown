@@ -256,6 +256,4 @@ npm run format
 npm run lint
 
 npm run build
-
-npm start
 ```

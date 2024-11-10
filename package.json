@@ -8,8 +8,7 @@
     "format": "prettier . --write",
     "lint": "prettier . --check",
     "lint-write": "npm run lint -- --write",
-    "build": "npm run clean && tsc src/index.ts",
-    "start": "node src/index.js"
+    "build": "npm run clean && ncc build src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -22,6 +21,7 @@
   },
   "homepage": "https://github.com/iamigui/jira-issue-to-markdown#readme",
   "dependencies": {
+    "@actions/core": "^1.11.1",
     "@vercel/ncc": "^0.38.2",
     "dotenv": "^16.4.5",
     "prettier": "^3.3.3",
