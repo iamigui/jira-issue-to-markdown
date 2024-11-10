@@ -1,6 +1,11 @@
 name: Tag and Release in Github
 
 on:
+  push:
+    branches:
+      - feature/*
+      - release/*
+      - fix/*
   pull_request:
     types: [closed]
 
