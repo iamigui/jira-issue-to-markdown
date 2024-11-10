@@ -35,7 +35,7 @@ jobs:
 
       - name: Launch Jira Tasks
         id: jira_tasks
-        uses: iamigui/jira-issue-to-markdown@feature/SCRUM-2
+        uses: iamigui/jira-issue-to-markdown@main
         with:
           branch_name: ${{ steps.get_tag.outputs.branch }}
           jira_data: ${{ secrets.JIRA_DATA }}
