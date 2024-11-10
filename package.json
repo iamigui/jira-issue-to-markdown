@@ -1,0 +1,30 @@
+{
+  "name": "jira-issue-to-markdown",
+  "version": "1.0.0",
+  "description": "Github Action Jira Issue to Markdown",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "format": "prettier . --write",
+    "lint": "prettier . --check",
+    "lint-write": "npm run lint -- --write",
+    "build": "npm run clean && ncc build src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iamigui/jira-issue-to-markdown.git"
+  },
+  "author": "iamigui",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iamigui/jira-issue-to-markdown/issues"
+  },
+  "homepage": "https://github.com/iamigui/jira-issue-to-markdown#readme",
+  "dependencies": {
+    "@vercel/ncc": "^0.38.2",
+    "dotenv": "^16.4.5",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}
