@@ -1,0 +1,45 @@
+name: Tag and Release in Github
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: write # Grant permission to write to the repository
+
+jobs:
+  tag-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Git
+        shell: bash
+        run: |
+          git config user.name "gh-actions-releaser"
+          git config user.email "ghactionsreleaser@gmail.com"
+
+      - name: Get tag
+        shell: bash
+        id: get_tag
+        run: |
+          git fetch --all
+          git checkout ${{ github.event.pull_request.head.ref }}
+          echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT 
+          git pull
+          git branch --show-current
+          echo "version=v$(npm pkg get version | tr -d '\"')" >> $GITHUB_OUTPUT
+
+      - name: Launch Jira Tasks
+        id: jira_tasks
+        uses: iamigui/jira-issue-to-markdown@v1
+        if: ${{ github.event.pull_request.merged == true }}
+        with:
+          branch_name: ${{ steps.get_tag.outputs.branch }}
+          jira_data: ${{ secrets.JIRA_DATA }}
+
+      - name: Get Outputs
+        shell: bash
+        run: |
+          echo "Release content from the previous step: ${{ steps.jira_tasks.outputs.release_content }}"
