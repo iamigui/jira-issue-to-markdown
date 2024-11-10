@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Jira Tasks
         id: jira_tasks
-        uses: iamigui/jira-issue-to-markdown@v1.1.1
+        uses: iamigui/jira-issue-to-markdown@v1
         with:
           branch_name: "branchname"
           jira_data: ${{ secrets.JIRA_DATA }}
@@ -68,7 +68,7 @@ jobs:
 
       - name: Jira Tasks
         id: jira_tasks
-        uses: iamigui/actions/jira-issue-to-markdown@v1.1.1
+        uses: iamigui/jira-issue-to-markdown@v1
         with:
           branch_name: ${{ steps.get_tag.outputs.branch }}
           jira_data: ${{ secrets.JIRA_DATA }}
@@ -127,7 +127,7 @@ jobs:
 
       - name: Launch Jira Tasks
         id: jira_tasks
-        uses: iamigui/actions/jira-issue-to-markdown@v1.1.1
+        uses: iamigui/jira-issue-to-markdown@v1
         if: ${{ github.event.pull_request.merged == true }}
         with:
           branch_name: ${{ steps.get_tag.outputs.branch }}

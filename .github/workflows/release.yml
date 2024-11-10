@@ -1,0 +1,65 @@
+name: Tag and Release in Github
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write # Grant permission to write to the repository
+
+jobs:
+  tag-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Git
+        shell: bash
+        run: |
+          git config user.name "gh-actions-releaser"
+          git config user.email "ghactionsreleaser@gmail.com"
+
+      - name: Get tag
+        shell: bash
+        id: get_tag
+        run: |
+          git fetch --all
+          git checkout ${{ github.event.pull_request.head.ref }}
+          echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
+          git pull
+          git branch --show-current
+          echo "version=v$(npm pkg get version | tr -d '\"')" >> $GITHUB_OUTPUT
+
+      - name: Tag the commit
+        if: ${{ github.event.pull_request.merged == true }}
+        shell: bash
+        run: |
+          next_version=${{ steps.get_tag.outputs.version }}
+          git tag $next_version
+          git push origin $next_version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Launch Jira Tasks
+        id: jira_tasks
+        uses: .
+        if: ${{ github.event.pull_request.merged == true }}
+        with:
+          branch_name: ${{ steps.get_tag.outputs.branch }}
+          jira_data: ${{ secrets.JIRA_DATA }}
+
+      - name: Release
+        id: release
+        shell: bash
+        if: ${{ github.event.pull_request.merged == true }}
+        run: |
+          TAG_NAME=${{ steps.get_tag.outputs.version }}
+          PR_DESCRIPTION="${{ steps.jira_tasks.outputs.release_content }}"
+          echo "Creating release for tag: $TAG_NAME"
+          echo "Description: $PR_DESCRIPTION"
+
+          # Create the release with the PR description
+          gh release create $TAG_NAME --title "$TAG_NAME" --notes "$PR_DESCRIPTION"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
