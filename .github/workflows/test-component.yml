@@ -1,0 +1,48 @@
+name: Test Components
+
+on:
+  push:
+    branches:
+      - feature/*
+      - release/*
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  jira-issue-to-markdown:
+    name: Run Jira Tasks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Get tag
+        shell: bash
+        id: get_tag
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            git fetch --all
+            git checkout ${{ github.event.pull_request.head.ref }}
+            echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT 
+          else 
+            echo "branch=${{ github.ref }}" >> $GITHUB_OUTPUT
+          fi
+          git pull
+          git branch --show-current
+
+      - name: Launch Jira Tasks
+        id: jira_tasks
+        uses: .
+        with:
+          branch_name: ${{ steps.get_tag.outputs.branch }}
+          jira_data: ${{ secrets.JIRA_DATA }}
+
+      - name: Get Outputs
+        shell: bash
+        run: |
+          echo "Release content from the previous step: ${{ steps.jira_tasks.outputs.release_content }}"
