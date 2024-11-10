@@ -6,14 +6,6 @@ branding:
   color: black
   icon: play-circle
 
-inputs:
-  branch_name:
-    description: Branch name
-    required: true
-  jira_data:
-    description: Jira Data
-    required: true
-
 runs:
   using: 'node20'
   main: 'dist/index.js'

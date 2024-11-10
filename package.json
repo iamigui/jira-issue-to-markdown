@@ -1,6 +1,6 @@
 {
   "name": "jira-issue-to-markdown",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Github Action Jira Issue to Markdown",
   "main": "index.js",
   "scripts": {
