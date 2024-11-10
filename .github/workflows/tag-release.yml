@@ -25,10 +25,13 @@ jobs:
         id: get_tag
         run: |
           git fetch --all
-          git checkout ${{ github.event.pull_request.head.ref }}
-          echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT 
-          git pull
-          git branch --show-current
+
+          if [ -z "${{ github.event.pull_request.head.ref }}" ]; then
+            echo "branch=${{ github.ref }}" >> $GITHUB_OUTPUT 
+          else
+            git checkout ${{ github.event.pull_request.head.ref }}
+            echo "branch=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT 
+          fi
           echo "version=v$(npm pkg get version | tr -d '\"')" >> $GITHUB_OUTPUT
 
       - name: Tag the commit
