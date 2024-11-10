@@ -1,13 +1,13 @@
 {
   "name": "jira-issue-to-markdown",
   "version": "1.0.0",
-  "description": "Github Action Jira Tasks",
+  "description": "Github Action Jira Issue to Markdown",
   "main": "index.js",
   "scripts": {
     "clean": "rm -rf dist",
     "format": "prettier . --write",
     "lint": "prettier . --check",
-    "lint-write": "npm run lint --write",
+    "lint-write": "npm run lint -- --write",
     "build": "npm run clean && ncc build src/index.ts"
   },
   "repository": {

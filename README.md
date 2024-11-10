@@ -1,6 +1,6 @@
-# Jira Tasks Action
+# Jira Issue to Markdown Action
 
-This action is used to obtain Jira subtasks from a Task and output it to the release description as notes. To use this the `branch` must match the pattern used in Jira. Refer to [Inputs](#inputs) for more information
+This action is used to obtain Jira subtasks from an Issue and output it to the release description as notes. To use this the `branch` must match the pattern used in Jira. Refer to [Inputs](#inputs) for more information
 
 ## Usage
 
